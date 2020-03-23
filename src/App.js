@@ -12,14 +12,7 @@ export default class App extends Component {
     this.state = { messages: [] }; // <- set up react state
 
     var firebaseConfig = {
-      apiKey: "AIzaSyBy0_UINg8CK_Z-IKngYjElsO1NsXHtWBE",
-      authDomain: "collector-188a6.firebaseapp.com",
-      databaseURL: "https://collector-188a6.firebaseio.com",
-      projectId: "collector-188a6",
-      storageBucket: "collector-188a6.appspot.com",
-      messagingSenderId: "284161208733",
-      appId: "1:284161208733:web:5b39b4e78258bfcb873f74",
-      measurementId: "G-50836SHK2J"
+      
     };
     firebase.initializeApp(firebaseConfig);
 
