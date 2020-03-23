@@ -25,14 +25,14 @@ let Styles = {
   }
 }
 
-export default function Header() {
+export default function Header(props) {
   return (
     <div style={Styles.divStyle}>
       <label style={Styles.titleStyle}>Collector://</label>
-      <Button>Home</Button>
-      <Button>Other</Button>
-      <Button>Outside</Button>
-      <Button>About</Button>
+      <Button handleClick={() => {console.log("click home"); props.changePage('Home')}}>Home</Button>
+      <Button handleClick={() => {console.log("click game"); props.changePage('Game')}}>Game</Button>
+      <Button handleClick={() => {console.log("click about"); props.changePage('About')}}>About</Button>
+      <Button handleClick={() => {console.log("click pw"); props.changePage('Passwords')}}>Passwords</Button>
       <label style={Styles.titleStyle}></label>
     </div>
   );

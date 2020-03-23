@@ -36,7 +36,8 @@ let Styles = {
     marginTop: '10px',
     marginBottom: '10px',
     borderRadius: '10px',
-    transition: '.3s'
+    transition: '.3s',
+    border: 'none'
   },
   divStyleOver: {
     display: 'flex',
@@ -51,7 +52,8 @@ let Styles = {
     marginTop: '10px',
     marginBottom: '10px',
     borderRadius: '10px',
-    transition: '.3s'
+    transition: '.3s',
+    border: 'none'
   }
 }
 
@@ -68,11 +70,11 @@ class Button extends React.Component {
         onMouseEnter={this.handleBoxToggle}
         onMouseLeave={this.handleBoxToggle}
       >
-        <div style={this.state.showBox ? Styles.divStyle : Styles.divStyleOver}>
+        <button onClick={this.props.handleClick} style={this.state.showBox ? Styles.divStyle : Styles.divStyleOver}>
           <label style={this.state.showBox ? Styles.labelStyleOver : Styles.labelStyle}>
             {this.props.children}
           </label>
-        </div>
+        </button>
       </div>
     );
   }
