@@ -63,10 +63,9 @@ export default class App extends Component {
 
   render() {
     return (
-      <div style={{backgroundColor: '#eadeda'}}>
+      <div style={{backgroundColor: '#eadeda', display: 'flex', flexDirection: 'column', height: '100%'}}>
         <Header changePage={this.changePage}/>
         {this.getContent()}
-        <Footer />
       </div>
     );
   }

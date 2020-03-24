@@ -1,6 +1,5 @@
 import React from 'react';
 import Grid from './Grid';
-import firebase from 'firebase';
 
 let Styles = {
   divStyle: {
@@ -48,7 +47,6 @@ class Game extends React.Component {
     });
   }
 
-  
   setWorldText = (newWorldText) => this.setState({ worldText: newWorldText });
 
   handleInput = (event) => {

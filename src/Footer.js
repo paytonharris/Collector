@@ -16,6 +16,7 @@ let Styles = {
     paddingTop: '5px',
     paddingBottom: '5px',
     backgroundColor: '#2e294e',//D3EAD5
+    height: '200px'
   },
   titleStyle: {
     color: '#ffe0b5',
@@ -29,8 +30,8 @@ let Styles = {
 export default function Footer() {
   return (
     <div style={Styles.divStyle}>
-      <label style={Styles.titleStyle, {paddingTop: "400px"}}></label>
-      <label style={Styles.titleStyle}>Collector://</label>
+      <label style={Styles.titleStyle}></label>
+      <label style={Styles.titleStyle}></label>
     </div>
   );
 }

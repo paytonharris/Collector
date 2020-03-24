@@ -19,9 +19,7 @@ let Styles = {
   titleStyle: {
     color: '#ffe0b5',
     fontSize: '40px',
-    padding: 15,
-    flex: 1,
-    marginLeft: "20%"
+    padding: 15
   }
 }
 
@@ -33,7 +31,6 @@ export default function Header(props) {
       <Button handleClick={() => {console.log("click game"); props.changePage('Game')}}>Game</Button>
       <Button handleClick={() => {console.log("click about"); props.changePage('About')}}>About</Button>
       <Button handleClick={() => {console.log("click pw"); props.changePage('Passwords')}}>Passwords</Button>
-      <label style={Styles.titleStyle}></label>
     </div>
   );
 }
