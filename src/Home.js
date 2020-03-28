@@ -26,33 +26,29 @@ class Home extends React.Component {
 
     setTimeout(this.mutateText, Math.round(Math.random() * 7000));
 
-    var output = "";
-
     for(var i = 0; i < 500; i++) {
-      output += this.garbage[this.getRandomInt(0, this.garbage.length-1)];
+      console.log(this.getRandomInt(0,5));
     }
-
-    console.log(output);
   }
 
   symbols = "`~!@#$%^&*()-_=+\\|][}{'\";:/?.>,<";
   garbage = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`~!@#$%^&*()-_=+\\|][}{'\";:/?.>,<";
 
-  getRandomInt = (min, max) => { // min is inclusive, max is exclusive
+  getRandomInt = (min, max) => { // min and max both inclusive
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   mutateTextAtIndex = (text, i) => {
-    let randomChar = this.garbage[this.getRandomInt(0, this.garbage.length)];
+    let randomChar = this.garbage[this.getRandomInt(0, this.garbage.length - 1)];
     return text.substring(0, i) + randomChar + text.substring(i + 1);
   };
 
   mutateText = () => {
-    let randomIndex = this.getRandomInt(0, this.state.currentText.length);
+    let randomIndex = this.getRandomInt(0, this.state.currentText.length - 1);
     
-    let flickers = this.getRandomInt(1, 5);
+    let flickers = this.getRandomInt(1, 4);
 
     let firstTime = this.getRandomInt(0, 200);
     let secondTime = this.getRandomInt(0, 100);
