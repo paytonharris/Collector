@@ -1,13 +1,15 @@
 import React from 'react';
-import Button from './Button';
+import Colors from './Styles';
 
 let Styles = {
   labelStyle: {
-    color: '#ffe0b5',
-    backgroundColor: 'gray',
-    borderRadius: '5px',
+    color: Colors.text,
+    backgroundColor: Colors.background,
+    fontFamily: 'VT323',
     alignSelf: 'center',
     padding: '15px',
+    letterSpacing: '4px',
+    fontSize: '40px'
   },
   divStyle: {
     display: 'flex',
@@ -18,10 +20,73 @@ let Styles = {
   }
 }
 
-export default function Home(props) {
-  return (
-    <div style={Styles.divStyle}>
-      <label style={Styles.labelStyle}>cool website.</label>
-    </div>
-  );
+class Home extends React.Component {
+  constructor(props) {
+    super(props);
+
+    setTimeout(this.mutateText, Math.round(Math.random() * 7000));
+  }
+
+  symbols = "`~!@#$%^&*()-_=+\\|][}{'\";:/?.>,<";
+  garbage = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`~!@#$%^&*()-_=+\\|][}{'\";:/?.>,<";
+
+  getRandomInt = (min, max) => { // min is inclusive, max is exclusive
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  mutateTextAtIndex = (text, i) => {
+    let randomChar = this.garbage[Math.round(Math.random() * this.garbage.length)];
+    return text.substring(0, i) + randomChar + text.substring(i + 1);
+  };
+
+  mutateText = () => {
+    let randomIndex = this.getRandomInt(0, this.state.currentText.length);
+    
+    let flickers = this.getRandomInt(1, 5);
+
+    let firstTime = this.getRandomInt(0, 200);
+    let secondTime = this.getRandomInt(0, 100);
+    let thirdTime = this.getRandomInt(0, 500);
+    let fourthTime = this.getRandomInt(0, 200);
+
+    setTimeout(() => {
+      this.setState({ ...this.state, currentText: this.mutateTextAtIndex(this.state.currentText, randomIndex) });
+    }, firstTime);
+
+    if (flickers >= 2) {
+      setTimeout(() => {
+        this.setState({ ...this.state, currentText: this.mutateTextAtIndex(this.state.currentText, randomIndex) });
+      }, firstTime + secondTime);
+    }
+
+    if (flickers >= 3) {
+      setTimeout(() => {
+        this.setState({ ...this.state, currentText: this.mutateTextAtIndex(this.state.currentText, randomIndex) });
+      }, firstTime + secondTime + thirdTime);
+    }
+
+    if (flickers >= 4) {
+      setTimeout(() => {
+        this.setState({ ...this.state, currentText: this.mutateTextAtIndex(this.state.currentText, randomIndex) });
+      }, firstTime + secondTime + thirdTime + fourthTime);
+    }
+
+    setTimeout(this.mutateText, Math.round(Math.random() * 7000));
+  };
+
+  state = {
+    currentText: "Sometimes memory comes alive. It's not such a bad thing!"
+  };
+
+  render () {
+    return(
+      <div style={Styles.divStyle}>
+        <label style={Styles.labelStyle}>{this.state.currentText}</label>
+      </div>
+    );
+  }
 }
+
+export default Home 

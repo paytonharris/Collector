@@ -1,36 +1,48 @@
 import React from 'react';
 import Button from './Button';
+import Colors from './Styles';
 
 let Styles = {
-  labelStyle: {
-    color: '#ffe0b5',//183310
-    backgroundColor: 'black',
-    borderRadius: '5px',
-    flex: 1
-  },
   divStyle: {
     display: 'flex',
     alignContent: 'center',
     justifyContent: 'center',
     paddingTop: '5px',
     paddingBottom: '5px',
-    backgroundColor: '#2e294e',//D3EAD5
+    backgroundColor: Colors.background
   },
   titleStyle: {
-    color: '#ffe0b5',
-    fontSize: '40px',
-    padding: 15
+    color: Colors.text,
+    fontSize: '50px',
+    padding: 15,
+    fontFamily: 'VT323',
+  },
+  bottomLine: {
+    height: '3px',
+    backgroundColor: Colors.highlightedBackground,
+  },
+  spacer: {
+    height: '3px',
+    backgroundColor: Colors.backgroundColor,
+    flex: 1
+  },
+  mainContainer: {
+    display: 'flex',
+    flexDirection: 'column',
   }
 }
 
 export default function Header(props) {
   return (
-    <div style={Styles.divStyle}>
-      <label style={Styles.titleStyle}>Collector://</label>
-      <Button handleClick={() => {console.log("click home"); props.changePage('Home')}}>Home</Button>
-      <Button handleClick={() => {console.log("click game"); props.changePage('Game')}}>Game</Button>
-      <Button handleClick={() => {console.log("click about"); props.changePage('About')}}>About</Button>
-      <Button handleClick={() => {console.log("click pw"); props.changePage('Passwords')}}>Passwords</Button>
+    <div style={Styles.mainContainer}>
+      <div style={Styles.divStyle}>
+        <label style={Styles.titleStyle}>Collector://</label>
+        <Button handleClick={() => {console.log("click home"); props.changePage('Home')}}>Home</Button>
+        <Button handleClick={() => {console.log("click game"); props.changePage('Game')}}>Game</Button>
+        <Button handleClick={() => {console.log("click about"); props.changePage('About')}}>About</Button>
+        <div style={Styles.spacer}></div>
+      </div>
+      <div style={Styles.bottomLine}></div>
     </div>
   );
 }

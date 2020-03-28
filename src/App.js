@@ -1,13 +1,10 @@
 import React, { Component } from 'react';
-import Container from '@material-ui/core/Container';
-import Box from '@material-ui/core/Box';
 import Game from './Game';
 import Header from './Header';
-import Footer from './Footer';
 import firebase from 'firebase';
 import Home from './Home';
 import About from './About';
-import Passwords from './Passwords';
+import Colors from './Styles';
 
 export default class App extends Component {
   constructor(props) {
@@ -40,11 +37,7 @@ export default class App extends Component {
     switch (this.state.currentPage) {
       case 'Game':
         page = (
-        <Container maxWidth="sm">
-          <Box my={4}>
-            <Game data={this.db}/>
-          </Box>
-        </Container>
+          <Game data={this.db}/>
         );
         break;
       case 'About':
@@ -53,9 +46,6 @@ export default class App extends Component {
       case 'Home':
         page = <Home></Home>;
         break;
-      case 'Passwords':
-        page = <Passwords></Passwords>
-        break;
     }
 
     return page;
@@ -63,7 +53,7 @@ export default class App extends Component {
 
   render() {
     return (
-      <div style={{backgroundColor: '#eadeda', display: 'flex', flexDirection: 'column', height: '100%'}}>
+      <div style={{backgroundColor: Colors.backgroundColor, display: 'flex', flexDirection: 'column', height: '100%'}}>
         <Header changePage={this.changePage}/>
         {this.getContent()}
       </div>

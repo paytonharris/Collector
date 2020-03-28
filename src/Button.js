@@ -1,27 +1,29 @@
 import React from 'react';
+import Colors from './Styles';
 
 let Styles = {
   labelStyle: {
-    color: '#eadeda',
+    color: Colors.text,
     borderRadius: '5px',
     flex: 1,
     alignSelf: 'center',
     justifyContent: 'center',
     textAlign: 'center',
-    fontFamily: 'Lato',
-    fontSize: '24px',
-    transition: '.3s'
+    fontFamily: 'VT323',
+    fontSize: '32px',
+    transition: '1s'
   },
   labelStyleOver: {
-    color: '#544f6e',
+    color: Colors.highlightedText,
     borderRadius: '5px',
     flex: 1,
     alignSelf: 'center',
     justifyContent: 'stretch',
     textAlign: 'center',
-    fontFamily: 'Lato',
-    fontSize: '24px',
-    transition: '.3s'
+    fontFamily: 'VT323',
+    letterSpacing: '4px',
+    fontSize: '32px',
+    transition: '1s'
   },
   divStyle: {
     display: 'flex',
@@ -29,14 +31,14 @@ let Styles = {
     flexDirection: 'column',
     alignContent: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f6ea8c',
+    backgroundColor: Colors.highlightedBackground,
     padding: '20px',
     marginRight: '5px',
     marginLeft: '5px',
     marginTop: '10px',
     marginBottom: '10px',
     borderRadius: '10px',
-    transition: '.3s',
+    transition: '1s',
     border: 'none'
   },
   divStyleOver: {
@@ -45,7 +47,7 @@ let Styles = {
     flexDirection: 'column',
     alignContent: 'center',
     justifyContent: 'center',
-    backgroundColor: '#544f6e',
+    backgroundColor: Colors.background,
     padding: '20px',
     marginRight: '5px',
     marginLeft: '5px',
