@@ -16,7 +16,14 @@ let Styles = {
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: '15%',
-    flex: 1
+    flex: 1,
+    flexDirection: 'column'
+  },
+  linkStyle: {
+    fontSize: '55px',
+    textDecoration: 'underline',
+    cursor: 'pointer',
+    paddingTop: '0%'
   }
 }
 
@@ -26,13 +33,13 @@ class Home extends React.Component {
 
     setTimeout(this.mutateText, Math.round(Math.random() * 7000));
 
-    for(var i = 0; i < 500; i++) {
-      console.log(this.getRandomInt(0,5));
-    }
+    // for(var i = 0; i < 500; i++) {
+    //   console.log(this.getRandomInt(0,5));
+    // }
   }
 
   symbols = "`~!@#$%^&*()-_=+\\|][}{'\";:/?.>,<";
-  garbage = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`~!@#$%^&*()-_=+\\|][}{'\";:/?.>,<";
+  garbage = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`~!@#$%^&*()-_=+\\|][}{'\";:/?.>,< ";
 
   getRandomInt = (min, max) => { // min and max both inclusive
     min = Math.ceil(min);
@@ -88,6 +95,7 @@ class Home extends React.Component {
     return(
       <div style={Styles.divStyle}>
         <label style={Styles.labelStyle}>{this.state.currentText}</label>
+        <label style={{...Styles.labelStyle, ...Styles.linkStyle}} onClick={this.props.startGame}>Begin</label>
       </div>
     );
   }

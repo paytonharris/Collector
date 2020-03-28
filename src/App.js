@@ -9,7 +9,18 @@ import Colors from './Styles';
 export default class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { currentPage: 'Home' }; // <- set up react state
+
+    console.log(window.location.href);
+
+    var currentRoute = window.location.href.split('/');
+    var homeRoute = currentRoute[0] + '/' + currentRoute[1] + '/'  + currentRoute[2] + '/';
+    console.log(homeRoute);
+    var page = 'Home'; 
+    if (currentRoute.length >= 3) {
+      page = currentRoute[3];
+    }
+
+    this.state = { currentPage: page, homeRoute: homeRoute };
 
     var firebaseConfig = {
       apiKey: "AIzaSyBy0_UINg8CK_Z-IKngYjElsO1NsXHtWBE",
@@ -27,24 +38,25 @@ export default class App extends Component {
   }
 
   changePage = (pageName) => {
-    console.log("in changepage");
-    this.setState({currentPage: pageName});
+    //window.location.href = this.state.homeRoute + pageName; //reloads page
+
+    window.history.pushState("", "", pageName);
+    this.setState({...this.state, currentPage: pageName});
   }
 
   getContent = () => {
     var page = <div></div>;
 
-    switch (this.state.currentPage) {
-      case 'Game':
-        page = (
-          <Game data={this.db}/>
-        );
+    switch (this.state.currentPage.toUpperCase()) {
+      case 'GAME':
+        page = <Game data={this.db}/>;
         break;
-      case 'About':
+      case 'ABOUT':
         page = <About></About>;
         break;
-      case 'Home':
-        page = <Home></Home>;
+      case 'HOME':
+      default:
+        page = <Home startGame={() => this.changePage('Game')}></Home>;
         break;
     }
 
