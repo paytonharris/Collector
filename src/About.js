@@ -1,34 +1,97 @@
 import React from 'react';
-import Button from './Button';
+import Colors from './Styles';
 
 let Styles = {
   labelStyle: {
-    color: '#183310',//183310
-    backgroundColor: 'black',
+    color: Colors.text,
+    backgroundColor: Colors.background,
+    fontFamily: 'VT323',
     alignSelf: 'center',
-    borderRadius: '5px',
-    flex: 1
+    padding: '15px',
+    letterSpacing: '4px',
+    fontSize: '40px'
   },
   divStyle: {
     display: 'flex',
-    alignContent: 'center',
+    alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: '5px',
-    paddingBottom: '5px',
-    backgroundColor: '#D3EAD5',//D3EAD5
+    flexDirection: 'column',
+    paddingTop: '15%',
     flex: 1
   },
-  titleStyle: {
-    color: '#183310',
-    fontSize: '40px',
-    padding: 15,
-    flex: 1,
-    marginLeft: "20%"
+  linkStyle: {
+    fontSize: '50px'
   }
 }
 
-export default function About(props) {
-  return (
-      <label style={Styles.titleStyle}>About!</label>
-  );
+class About extends React.Component {
+  constructor(props) {
+    super(props);
+
+    setTimeout(this.mutateText, Math.round(Math.random() * 7000));
+  }
+
+  symbols = "`~!@#$%^&*()-_=+\\|][}{'\";:/?.>,<";
+  garbage = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`~!@#$%^&*()-_=+\\|][}{'\";:/?.>,<";
+
+  getRandomInt = (min, max) => { // min is inclusive, max is exclusive
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  mutateTextAtIndex = (text, i) => {
+    let randomChar = this.garbage[this.getRandomInt(0, this.garbage.length)];
+    return text.substring(0, i) + randomChar + text.substring(i + 1);
+  };
+
+  mutateText = () => {
+    let randomIndex = this.getRandomInt(0, this.state.currentText.length);
+    
+    let flickers = this.getRandomInt(1, 5);
+
+    let firstTime = this.getRandomInt(0, 200);
+    let secondTime = this.getRandomInt(0, 100);
+    let thirdTime = this.getRandomInt(0, 500);
+    let fourthTime = this.getRandomInt(0, 200);
+
+    setTimeout(() => {
+      this.setState({ ...this.state, currentText: this.mutateTextAtIndex(this.state.currentText, randomIndex) });
+    }, firstTime);
+
+    if (flickers >= 2) {
+      setTimeout(() => {
+        this.setState({ ...this.state, currentText: this.mutateTextAtIndex(this.state.currentText, randomIndex) });
+      }, firstTime + secondTime);
+    }
+
+    if (flickers >= 3) {
+      setTimeout(() => {
+        this.setState({ ...this.state, currentText: this.mutateTextAtIndex(this.state.currentText, randomIndex) });
+      }, firstTime + secondTime + thirdTime);
+    }
+
+    if (flickers >= 4) {
+      setTimeout(() => {
+        this.setState({ ...this.state, currentText: this.mutateTextAtIndex(this.state.currentText, randomIndex) });
+      }, firstTime + secondTime + thirdTime + fourthTime);
+    }
+
+    setTimeout(this.mutateText, Math.round(Math.random() * 7000));
+  };
+
+  state = {
+    currentText: "Checkout the project on github:"
+  };
+
+  render () {
+    return(
+      <div style={Styles.divStyle}>
+        <label style={Styles.labelStyle}>{this.state.currentText}</label>
+        <a style={{...Styles.labelStyle, ...Styles.linkStyle}} href='https://github.com/paytonharris/Collector'>@paytonharris</a>
+      </div>
+    );
+  }
 }
+
+export default About 

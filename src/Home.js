@@ -15,7 +15,7 @@ let Styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: '20%',
+    paddingTop: '15%',
     flex: 1
   }
 }
@@ -25,6 +25,14 @@ class Home extends React.Component {
     super(props);
 
     setTimeout(this.mutateText, Math.round(Math.random() * 7000));
+
+    var output = "";
+
+    for(var i = 0; i < 500; i++) {
+      output += this.garbage[this.getRandomInt(0, this.garbage.length-1)];
+    }
+
+    console.log(output);
   }
 
   symbols = "`~!@#$%^&*()-_=+\\|][}{'\";:/?.>,<";
@@ -37,7 +45,7 @@ class Home extends React.Component {
   }
 
   mutateTextAtIndex = (text, i) => {
-    let randomChar = this.garbage[Math.round(Math.random() * this.garbage.length)];
+    let randomChar = this.garbage[this.getRandomInt(0, this.garbage.length)];
     return text.substring(0, i) + randomChar + text.substring(i + 1);
   };
 

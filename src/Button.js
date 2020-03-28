@@ -23,7 +23,8 @@ let Styles = {
     fontFamily: 'VT323',
     letterSpacing: '4px',
     fontSize: '32px',
-    transition: '1s'
+    transition: '1s',
+    cursor: 'pointer'
   },
   divStyle: {
     display: 'flex',
@@ -39,7 +40,8 @@ let Styles = {
     marginBottom: '10px',
     borderRadius: '10px',
     transition: '1s',
-    border: 'none'
+    border: 'none',
+    cursor: 'pointer'
   },
   divStyleOver: {
     display: 'flex',
