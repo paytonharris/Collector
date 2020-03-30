@@ -86,18 +86,25 @@ class Grid extends React.Component {
 
     let worldWidth = 145;
 
-    var outText = '⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅';
-    //let thisFullRow = this.state.worldText.substring(num * worldWidth, num * worldWidth + worldWidth);
+    var outText = '.............................';
 
     let currentRowToRender = this.state.playerCoords.y - 14 + num;
     let currentColumnRange = {start: this.state.playerCoords.x - 14, stop: this.state.playerCoords.x + 15}
+
+    if (currentRowToRender < 0 || currentRowToRender >= worldWidth) {
+      return outText;
+    }
 
     let thisFullRow = this.state.worldText.substring(currentRowToRender * worldWidth, currentRowToRender * worldWidth + worldWidth);
     
     if (currentColumnRange.start >= 0 && currentColumnRange.stop <= worldWidth) {
       outText = (thisFullRow.substring(currentColumnRange.start, currentColumnRange.stop));
-    } else {
-      // do fancy editing of outText here.
+    } else if (currentColumnRange.start >= 0) { // the start is good but the end is past the range
+      outText = thisFullRow.substring(currentColumnRange.start) + outText;
+      outText = outText.substring(0, 30);
+    } else { // the start is before the start of the range
+      outText = outText + thisFullRow.substring(0, currentColumnRange.stop);
+      outText = outText.substring(outText.length - 29);
     }
 
     return outText.replace(/ /g, '⋅');
