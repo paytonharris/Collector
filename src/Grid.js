@@ -55,6 +55,8 @@ class Grid extends React.Component {
 
   componentDidMount() {
     this.setState({...this.state, divXY: this.getCurrentDivPosition()});
+
+    document.getElementById("GameInput").focus();
   }
 
   getCurrentDivPosition = () => {
@@ -101,13 +103,13 @@ class Grid extends React.Component {
       outText = (thisFullRow.substring(currentColumnRange.start, currentColumnRange.stop));
     } else if (currentColumnRange.start >= 0) { // the start is good but the end is past the range
       outText = thisFullRow.substring(currentColumnRange.start) + outText;
-      outText = outText.substring(0, 30);
+      outText = outText.substring(0, 29);
     } else { // the start is before the start of the range
       outText = outText + thisFullRow.substring(0, currentColumnRange.stop);
       outText = outText.substring(outText.length - 29);
     }
 
-    return outText.replace(/ /g, '⋅');
+    return outText.replace(/ /g, '.');
   };
 
   createLines = () => {
@@ -137,6 +139,13 @@ class Grid extends React.Component {
     this.setState({...this.state, playerCoords: {x: this.state.playerCoords.x + x, y: this.state.playerCoords.y + y}})
   }
 
+  handleClick = (event) => {
+    console.log("clicked: " + this.state.mouseCoords.x + ' ' + this.state.mouseCoords.y);
+
+
+    document.getElementById('GameInput').focus();
+  }
+
   handleKey = (event) => {
     switch (event.key) {
       case 'w':
@@ -162,9 +171,9 @@ class Grid extends React.Component {
 
   render() {
     return (
-      <div id='GameBounds' onMouseMove={this.trackMouseCoords} style={Styles.divStyle}>
+      <div id='GameBounds' onClick={this.handleClick} onMouseMove={this.trackMouseCoords} style={Styles.divStyle}>
         {this.createLines()}
-        <input id='GameInput' style={Styles.inputStyle} onKeyPress={this.handleKey} readOnly value=">"></input>
+        <input id='GameInput' style={Styles.inputStyle} onKeyPress={this.handleKey} readOnly autoFocus value=">"></input>
       </div>
     );
   }
