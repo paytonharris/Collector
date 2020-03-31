@@ -20,7 +20,9 @@ let Styles = {
     color: 'lightgray',
     fontSize: '32px',
     borderStyle: 'hidden',
-    paddingBottom: '10px'
+    paddingBottom: '10px',
+    outline: 'none',
+    width: '600px'
   },
   highlighted: {
     color: '#222',
@@ -49,7 +51,14 @@ class Grid extends React.Component {
       worldText: props.worldText,
       divXY: {x: 100, y: 100, height: 100, width: 100},
       mouseCoords: {x: 0, y: 0},
-      playerCoords: {x: 50, y: 50}
+      playerCoords: {x: 50, y: 50},
+      playerCommands: [
+        {name: '', func: () => {}},
+        {name: "cout <<", func: this.cout},
+        {name: "DEL", func: () => this.deleteFunction()}
+      ],
+      currentCommand: 0, // 0 is null
+      currentInput: ''
     }
   }
 
@@ -57,6 +66,29 @@ class Grid extends React.Component {
     this.setState({...this.state, divXY: this.getCurrentDivPosition()});
 
     document.getElementById("GameInput").focus();
+  }
+
+  deleteFunction = () => {
+    var newText = '';
+
+    var xToDel = this.state.mouseCoords.x + this.state.playerCoords.x - 14;
+    var yToDel = this.state.mouseCoords.y + this.state.playerCoords.y - 14;
+
+    if (xToDel >= 0 && yToDel >= 0 && xToDel <= 144 && yToDel <= 144) { //within bounds of area
+      console.log(xToDel);
+      console.log(yToDel);
+      let indexOfChar = xToDel + (yToDel * 29);
+
+      console.log(`indexOfChar ${indexOfChar}`);
+      newText = `${this.state.worldText.substring(0, indexOfChar)}.${this.state.worldText.substring(indexOfChar + 1)}`;
+      console.log(newText);
+      this.setState({ ...this.state, worldText: newText });
+      console.log("I deleted", this.state.mouseCoords.x, this.state.mouseCoords.y);
+    }
+  }
+
+  cout = () => {
+    console.log("i wrote " + this.state.currentInput);
   }
 
   getCurrentDivPosition = () => {
@@ -142,6 +174,11 @@ class Grid extends React.Component {
   handleClick = (event) => {
     console.log("clicked: " + this.state.mouseCoords.x + ' ' + this.state.mouseCoords.y);
 
+    if (this.state.playerCommands[this.state.currentCommand]) {
+      this.state.playerCommands[this.state.currentCommand].func()
+    }
+
+    //this.setState({ ...this.state, currentInput: '' })
 
     document.getElementById('GameInput').focus();
   }
@@ -164,16 +201,48 @@ class Grid extends React.Component {
         console.log('d');
         this.handleMovement(1, 0);
         break;
+      case '1': case'2': case'3': case'4': case'5': case'6': case'7': case'8': case'9': case'0':
+        if (this.state.playerCommands.length > parseInt(event.key)) {
+          this.setState({ ...this.state, currentCommand: parseInt(event.key) });
+        }
+        console.log(event.key);
+        break;
       default:
-        console.log('NA');
+        this.setState({ ...this.state, currentInput: this.state.currentInput + event.key });
+        console.log(event.key);
     }
+  }
+
+  getCommandText = () => {
+    var outText = '';
+
+    if (this.state.currentCommand === 0) return; 
+
+    if (this.state.playerCommands[this.state.currentCommand]) {
+      outText = this.state.playerCommands[this.state.currentCommand].name;
+
+      if (this.state.currentCommand === 1) {
+        outText += ` ${this.state.currentInput[this.state.currentInput.length - 1] || ''}`;
+      } 
+      
+      outText += ` ${this.state.mouseCoords.x + this.state.playerCoords.x - 14},${this.state.mouseCoords.y + this.state.playerCoords.y - 14}`;
+    }
+
+    return outText;
   }
 
   render() {
     return (
       <div id='GameBounds' onClick={this.handleClick} onMouseMove={this.trackMouseCoords} style={Styles.divStyle}>
         {this.createLines()}
-        <input id='GameInput' style={Styles.inputStyle} onKeyPress={this.handleKey} readOnly autoFocus value=">"></input>
+        <input 
+          id='GameInput' 
+          style={Styles.inputStyle} 
+          onKeyPress={this.handleKey}
+          readOnly 
+          autoFocus 
+          value={this.getCommandText()}
+         />
       </div>
     );
   }
