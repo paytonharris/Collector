@@ -40,7 +40,7 @@ let Styles = {
   }
 };
 
-let totalLines = 29;
+let totalRowsToDisplay = 29;
 let worldWidth = 145;
 
 class Grid extends React.Component {
@@ -121,8 +121,8 @@ class Grid extends React.Component {
   };
 
   trackMouseCoords = (event) => {
-    var xCoord = Math.round(((event.clientX - this.state.divXY.x) / this.state.divXY.width) * totalLines);
-    var yCoord = Math.round(((event.clientY - this.state.divXY.y) / this.state.divXY.height) * totalLines);
+    var xCoord = Math.round(((event.clientX - this.state.divXY.x) / this.state.divXY.width) * totalRowsToDisplay);
+    var yCoord = Math.round(((event.clientY - this.state.divXY.y) / this.state.divXY.height) * totalRowsToDisplay);
 
     if (xCoord !== this.state.mouseCoords.x || yCoord !== this.state.mouseCoords.y) {
       this.setState({...this.state, mouseCoords: {x: xCoord, y: yCoord}});
@@ -130,7 +130,7 @@ class Grid extends React.Component {
     }
   };
 
-  renderRow = (num) => {
+  getRowOfWorldText = (num) => {
     // a box is 29x29. 
     // the grid is 5x5 of boxes
     // total chars is 21025
@@ -145,7 +145,7 @@ class Grid extends React.Component {
       return outText;
     }
 
-    let thisFullRow = this.state.worldText[this.state.playerCoords.y - 14 + num];
+    let thisFullRow = this.state.worldText[this.state.playerCoords.y - 14 + num] || outText;
     
     if (currentColumnRange.start >= 0 && currentColumnRange.stop <= this.worldWidth) {
       outText = (thisFullRow.substring(currentColumnRange.start, currentColumnRange.stop));
@@ -163,24 +163,73 @@ class Grid extends React.Component {
   createLines = () => {
     var items = [];
   
-    for (var i = 0; i < totalLines; i++) {
+    for (var i = 0; i < totalRowsToDisplay; i++) {
       if (this.state.mouseCoords.y === i) {
         items.push(<label style={Styles.labelStyle}>
-          {this.createInnerContents(this.renderRow(i))}
+          {this.createInnerContents(this.getRowOfWorldText(i), i)}
+        </label>);
+      } else if (i === (totalRowsToDisplay - 1) / 2) {
+        items.push(<label style={Styles.labelStyle}>
+          {this.createInnerContentsForCharacter(this.getRowOfWorldText(i))}
         </label>);
       } else {
-        items.push(<label style={Styles.labelStyle}>{this.renderRow(i)}</label>);
+        items.push(<label style={Styles.labelStyle}>{this.getRowOfWorldText(i)}</label>);
       }
     }
   
     return items;
   };
 
-  createInnerContents = (text) => {
-    let firstPart = text.substring(0, this.state.mouseCoords.x);
-    let highlightedPart = text.substring(this.state.mouseCoords.x, this.state.mouseCoords.x + 1);
-    let secondPart = text.substring(this.state.mouseCoords.x + 1);
-    return <label>{firstPart}<span style={Styles.highlighted}>{highlightedPart}</span>{secondPart}</label>;
+  createInnerContents = (text, i) => {
+    let playerPos = (totalRowsToDisplay - 1) / 2;
+
+    if (i === playerPos && playerPos !== this.state.mouseCoords.x) { // the player and mouse highlight are on the same row
+      if (this.state.mouseCoords.x > playerPos) {
+        let firstPart = text.substring(0, playerPos);
+        let highlightedPlayer = text.substring(playerPos, playerPos + 1);
+        let middlePart = text.substring(playerPos + 1, this.state.mouseCoords.x);
+        let highlightedPart = text.substring(this.state.mouseCoords.x, this.state.mouseCoords.x + 1);
+        let lastPart = text.substring(this.state.mouseCoords.x + 1);
+
+        return <label>
+          {firstPart}
+            <span style={Styles.playerHighlight}>{highlightedPlayer}</span>
+          {middlePart}
+            <span style={Styles.highlighted}>{highlightedPart}</span>
+          {lastPart}
+        </label>;
+      } else {
+        let firstPart = text.substring(0, this.state.mouseCoords.x);
+        let highlightedPart = text.substring(this.state.mouseCoords.x, this.state.mouseCoords.x + 1);
+        let middlePart = text.substring(this.state.mouseCoords.x + 1, playerPos);
+        let highlightedPlayer = text.substring(playerPos, playerPos + 1);
+        let lastPart = text.substring(playerPos + 1);
+
+        return <label>
+          {firstPart}
+            <span style={Styles.highlighted}>{highlightedPart}</span>
+          {middlePart}
+            <span style={Styles.playerHighlight}>{highlightedPlayer}</span>
+          {lastPart}
+        </label>;
+      }
+      
+    } else {
+      let firstPart = text.substring(0, this.state.mouseCoords.x);
+      let highlightedPart = text.substring(this.state.mouseCoords.x, this.state.mouseCoords.x + 1);
+      let secondPart = text.substring(this.state.mouseCoords.x + 1);
+
+      return <label>{firstPart}<span style={Styles.highlighted}>{highlightedPart}</span>{secondPart}</label>;
+    }
+  };
+
+  createInnerContentsForCharacter = (text) => {
+    let centerCharSpot = (totalRowsToDisplay - 1) / 2;
+
+    let firstPart = text.substring(0, centerCharSpot);
+    let highlightedPart = text.substring(centerCharSpot, centerCharSpot + 1);
+    let secondPart = text.substring(centerCharSpot + 1);
+    return <label>{firstPart}<span style={Styles.playerHighlight}>{highlightedPart}</span>{secondPart}</label>;
   };
 
   handleMovement = (x, y) => {
