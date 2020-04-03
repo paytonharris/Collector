@@ -1,4 +1,5 @@
 import React from 'react';
+import GameConsole from './GameConsole';
 
 let Styles = {
   labelStyle: {
@@ -33,10 +34,16 @@ let Styles = {
   },
   playerHighlight: {
     color: '#222',
-    backgroundColor: '#ccc',
+    backgroundColor: '#ffe0b5',// '#fadadd', //'#f9c0cc', 96787e, light green: d5dbc0, cedba2
     lineHeight: '24px',
     letterSpacing: '12px',
     userSelect: 'none'
+  },
+  container: {
+    display: 'flex',
+  },
+  consoleSpacing: {
+    width: '400px'
   }
 };
 
@@ -58,15 +65,44 @@ class Grid extends React.Component {
         {name: "replace([A-Za-z]), '.');", func: () => this.replaceCharWithDot()}
       ],
       currentCommand: 0, // 0 is null
-      currentInput: ''
+      currentInput: '',
+      messages: [""]
     }
   }
 
   componentDidMount() {
     this.setState({...this.state, divXY: this.getCurrentDivPosition()});
 
+    this.startConsoleMessages();
+
     document.getElementById("GameInput").focus();
   }
+
+  startConsoleMessages = () => {
+    setTimeout(() => {
+      this.messageToConsole("Hi!");
+    }, 1000);
+    
+    setTimeout(() => {
+      this.messageToConsole("I'm an abandoned garbage collector process.");
+    }, 3000);
+    
+    setTimeout(() => {
+      this.messageToConsole("But that's ok!");
+    }, 6000);
+
+    setTimeout(() => {
+      this.messageToConsole("Hint: Press 1 and 2 to change commands");
+    }, 9000);
+
+    setTimeout(() => {
+      this.messageToConsole("Click on a character to execute the command!");
+    }, 12000);
+  };
+
+  messageToConsole = (message) => {
+    this.setState({...this.state, messages: [message, ...this.state.messages]});
+  };
 
   convertWorldTextToArrays = (worldText) => {
     var worldTextArray = [];
@@ -106,7 +142,7 @@ class Grid extends React.Component {
   }
 
   cout = () => {
-    console.log("i wrote " + this.state.currentInput);
+    this.messageToConsole(this.state.currentInput);
   }
 
   getCurrentDivPosition = () => {
@@ -233,7 +269,16 @@ class Grid extends React.Component {
   };
 
   handleMovement = (x, y) => {
-    this.setState({...this.state, playerCoords: {x: this.state.playerCoords.x + x, y: this.state.playerCoords.y + y}})
+    let xOfNewPos = this.state.playerCoords.x + x;
+    let yOfNewPos = this.state.playerCoords.y + y;
+    let currentRow = this.state.worldText[yOfNewPos];
+
+    if (!currentRow[xOfNewPos].match(/[.,'`"_\-:;]/g)) {
+      this.messageToConsole("I don't think I can fit through there!");
+      console.log("I don't think I can fit through there!");
+    } else {
+      this.setState({...this.state, playerCoords: {x: this.state.playerCoords.x + x, y: this.state.playerCoords.y + y}})
+    }
   }
 
   handleClick = (event) => {
@@ -298,16 +343,20 @@ class Grid extends React.Component {
 
   render() {
     return (
-      <div id='GameBounds' onClick={this.handleClick} onMouseMove={this.trackMouseCoords} style={Styles.divStyle}>
-        {this.createLines()}
-        <input 
-          id='GameInput' 
-          style={Styles.inputStyle} 
-          onKeyPress={this.handleKey}
-          readOnly 
-          autoFocus 
-          value={this.getCommandText()}
-         />
+      <div style={Styles.container}>
+        <div style={Styles.consoleSpacing}/>
+        <div id='GameBounds' onClick={this.handleClick} onMouseMove={this.trackMouseCoords} style={Styles.divStyle}>
+          {this.createLines()}
+          <input 
+            id='GameInput' 
+            style={Styles.inputStyle} 
+            onKeyPress={this.handleKey}
+            readOnly 
+            autoFocus 
+            value={this.getCommandText()}
+          />
+        </div>
+        <GameConsole messages={this.state.messages}/>
       </div>
     );
   }
