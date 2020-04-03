@@ -41,21 +41,21 @@ let Styles = {
 };
 
 let totalLines = 29;
-let lengthOfGrid = 29;
+let worldWidth = 145;
 
 class Grid extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      worldText: props.worldText,
+      worldText: this.convertWorldTextToArrays(props.worldText),
       divXY: {x: 100, y: 100, height: 100, width: 100},
       mouseCoords: {x: 0, y: 0},
       playerCoords: {x: 50, y: 50},
       playerCommands: [
         {name: '', func: () => {}},
         {name: "cout <<", func: this.cout},
-        {name: "DEL", func: () => this.deleteFunction()}
+        {name: "replace([A-Za-z]), '.');", func: () => this.replaceCharWithDot()}
       ],
       currentCommand: 0, // 0 is null
       currentInput: ''
@@ -68,22 +68,40 @@ class Grid extends React.Component {
     document.getElementById("GameInput").focus();
   }
 
-  deleteFunction = () => {
-    var newText = '';
+  convertWorldTextToArrays = (worldText) => {
+    var worldTextArray = [];
 
+    if (worldText.length < this.worldWidth * this.worldWidth) {
+      console.log("The world is too small");
+
+      return [""];
+    }
+
+    for (var i = 0; i <= worldWidth; i++) {
+      worldTextArray.push(worldText.substring(i * worldWidth, (i+1) * worldWidth));
+    }
+
+    console.log(worldTextArray);
+
+    return worldTextArray;
+  }
+
+  replaceCharWithDot = () => {
     var xToDel = this.state.mouseCoords.x + this.state.playerCoords.x - 14;
     var yToDel = this.state.mouseCoords.y + this.state.playerCoords.y - 14;
 
     if (xToDel >= 0 && yToDel >= 0 && xToDel <= 144 && yToDel <= 144) { //within bounds of area
-      console.log(xToDel);
-      console.log(yToDel);
-      let indexOfChar = xToDel + (yToDel * 29);
+      let currentRow = this.state.worldText[yToDel];
 
-      console.log(`indexOfChar ${indexOfChar}`);
-      newText = `${this.state.worldText.substring(0, indexOfChar)}.${this.state.worldText.substring(indexOfChar + 1)}`;
-      console.log(newText);
-      this.setState({ ...this.state, worldText: newText });
-      console.log("I deleted", this.state.mouseCoords.x, this.state.mouseCoords.y);
+      if (!currentRow[xToDel].match(/[a-zA-Z]/g)) return;
+
+      let newRow = `${currentRow.substring(0, xToDel)}.${currentRow.substring(xToDel + 1)}`;
+
+      var oldWorldText = this.state.worldText;
+
+      oldWorldText[yToDel] = newRow;
+
+      this.setState({ ...this.state, worldText: oldWorldText });
     }
   }
 
@@ -112,26 +130,24 @@ class Grid extends React.Component {
     }
   };
 
-  parseText = (num) => {
+  renderRow = (num) => {
     // a box is 29x29. 
     // the grid is 5x5 of boxes
     // total chars is 21025
     // 145x145 so the max your coords could be is 144,144!
 
-    let worldWidth = 145;
-
     var outText = '.............................';
 
     let currentRowToRender = this.state.playerCoords.y - 14 + num;
-    let currentColumnRange = {start: this.state.playerCoords.x - 14, stop: this.state.playerCoords.x + 15}
+    let currentColumnRange = { start: this.state.playerCoords.x - 14, stop: this.state.playerCoords.x + 15 }
 
-    if (currentRowToRender < 0 || currentRowToRender >= worldWidth) {
+    if (currentRowToRender < 0 || currentRowToRender >= this.worldWidth) {
       return outText;
     }
 
-    let thisFullRow = this.state.worldText.substring(currentRowToRender * worldWidth, currentRowToRender * worldWidth + worldWidth);
+    let thisFullRow = this.state.worldText[this.state.playerCoords.y - 14 + num];
     
-    if (currentColumnRange.start >= 0 && currentColumnRange.stop <= worldWidth) {
+    if (currentColumnRange.start >= 0 && currentColumnRange.stop <= this.worldWidth) {
       outText = (thisFullRow.substring(currentColumnRange.start, currentColumnRange.stop));
     } else if (currentColumnRange.start >= 0) { // the start is good but the end is past the range
       outText = thisFullRow.substring(currentColumnRange.start) + outText;
@@ -150,10 +166,10 @@ class Grid extends React.Component {
     for (var i = 0; i < totalLines; i++) {
       if (this.state.mouseCoords.y === i) {
         items.push(<label style={Styles.labelStyle}>
-          {this.createInnerContents(this.parseText(i))}
+          {this.createInnerContents(this.renderRow(i))}
         </label>);
       } else {
-        items.push(<label style={Styles.labelStyle}>{this.parseText(i)}</label>);
+        items.push(<label style={Styles.labelStyle}>{this.renderRow(i)}</label>);
       }
     }
   
