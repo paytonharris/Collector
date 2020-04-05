@@ -1,5 +1,6 @@
 import React from 'react';
 import GameConsole from './GameConsole';
+import { makePaths } from './Helpers/helper'
 
 let Styles = {
   labelStyle: {
@@ -55,14 +56,15 @@ class Grid extends React.Component {
     super(props);
 
     this.state = {
-      worldText: this.convertWorldTextToArrays(props.worldText),
+      worldText: makePaths(this.convertWorldTextToArrays(props.worldText)),
       divXY: {x: 100, y: 100, height: 100, width: 100},
       mouseCoords: {x: 0, y: 0},
-      playerCoords: {x: 50, y: 50},
+      playerCoords: {x: 10, y: 10},
       playerCommands: [
         {name: '', func: () => {}},
         {name: "cout <<", func: this.cout},
-        {name: "replace([A-Za-z]), '.');", func: () => this.replaceCharWithDot()}
+        {name: "DEL", func: () => this.deleteChar()},
+        {name: "replace([A-Za-z]), ' ');", func: () => this.replaceCharWithDot()}
       ],
       currentCommand: 0, // 0 is null
       currentInput: '',
@@ -122,6 +124,23 @@ class Grid extends React.Component {
     return worldTextArray;
   }
 
+  deleteChar = () => {
+    var xToDel = this.state.mouseCoords.x + this.state.playerCoords.x - 14;
+    var yToDel = this.state.mouseCoords.y + this.state.playerCoords.y - 14;
+
+    if (xToDel >= 0 && yToDel >= 0 && xToDel <= 144 && yToDel <= 144) { //within bounds of area
+      let currentRow = this.state.worldText[yToDel];
+
+      let newRow = `${currentRow.substring(0, xToDel)}\u00a0${currentRow.substring(xToDel + 1)}`;
+
+      var oldWorldText = this.state.worldText;
+
+      oldWorldText[yToDel] = newRow;
+
+      this.setState({ ...this.state, worldText: oldWorldText });
+    }
+  }
+
   replaceCharWithDot = () => {
     var xToDel = this.state.mouseCoords.x + this.state.playerCoords.x - 14;
     var yToDel = this.state.mouseCoords.y + this.state.playerCoords.y - 14;
@@ -142,7 +161,22 @@ class Grid extends React.Component {
   }
 
   cout = () => {
-    this.messageToConsole(this.state.currentInput);
+    //this.messageToConsole(this.state.currentInput);
+
+    var xToDel = this.state.mouseCoords.x + this.state.playerCoords.x - 14;
+    var yToDel = this.state.mouseCoords.y + this.state.playerCoords.y - 14;
+
+    if (xToDel >= 0 && yToDel >= 0 && xToDel <= 144 && yToDel <= 144) { //within bounds of area
+      let currentRow = this.state.worldText[yToDel];
+
+      let newRow = `${currentRow.substring(0, xToDel)}${this.state.currentInput}${currentRow.substring(xToDel + 1)}`;
+
+      var oldWorldText = this.state.worldText;
+
+      oldWorldText[yToDel] = newRow;
+
+      this.setState({ ...this.state, worldText: oldWorldText });
+    }
   }
 
   getCurrentDivPosition = () => {
@@ -172,7 +206,7 @@ class Grid extends React.Component {
     // total chars is 21025
     // 145x145 so the max your coords could be is 144,144!
 
-    var outText = '.............................';
+    var outText = '\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0';
 
     let currentRowToRender = this.state.playerCoords.y - 14 + num;
     let currentColumnRange = { start: this.state.playerCoords.x - 14, stop: this.state.playerCoords.x + 15 }
@@ -193,7 +227,7 @@ class Grid extends React.Component {
       outText = outText.substring(outText.length - 29);
     }
 
-    return outText.replace(/ /g, '.');
+    return outText.replace(/ /g, "\u00a0");
   };
 
   createLines = () => {
@@ -201,15 +235,15 @@ class Grid extends React.Component {
   
     for (var i = 0; i < totalRowsToDisplay; i++) {
       if (this.state.mouseCoords.y === i) {
-        items.push(<label style={Styles.labelStyle}>
+        items.push(<span style={Styles.labelStyle}>
           {this.createInnerContents(this.getRowOfWorldText(i), i)}
-        </label>);
+        </span>);
       } else if (i === (totalRowsToDisplay - 1) / 2) {
-        items.push(<label style={Styles.labelStyle}>
+        items.push(<span style={Styles.labelStyle}>
           {this.createInnerContentsForCharacter(this.getRowOfWorldText(i))}
-        </label>);
+        </span>);
       } else {
-        items.push(<label style={Styles.labelStyle}>{this.getRowOfWorldText(i)}</label>);
+        items.push(<span style={Styles.labelStyle}>{this.getRowOfWorldText(i)}</span>);
       }
     }
   
@@ -221,11 +255,11 @@ class Grid extends React.Component {
 
     if (i === playerPos && playerPos !== this.state.mouseCoords.x) { // the player and mouse highlight are on the same row
       if (this.state.mouseCoords.x > playerPos) {
-        let firstPart = text.substring(0, playerPos);
-        let highlightedPlayer = text.substring(playerPos, playerPos + 1);
-        let middlePart = text.substring(playerPos + 1, this.state.mouseCoords.x);
-        let highlightedPart = text.substring(this.state.mouseCoords.x, this.state.mouseCoords.x + 1);
-        let lastPart = text.substring(this.state.mouseCoords.x + 1);
+        var firstPart = text.substring(0, playerPos);
+        var highlightedPlayer = text.substring(playerPos, playerPos + 1);
+        var middlePart = text.substring(playerPos + 1, this.state.mouseCoords.x);
+        var highlightedPart = text.substring(this.state.mouseCoords.x, this.state.mouseCoords.x + 1);
+        var lastPart = text.substring(this.state.mouseCoords.x + 1);
 
         return <label>
           {firstPart}
@@ -235,11 +269,11 @@ class Grid extends React.Component {
           {lastPart}
         </label>;
       } else {
-        let firstPart = text.substring(0, this.state.mouseCoords.x);
-        let highlightedPart = text.substring(this.state.mouseCoords.x, this.state.mouseCoords.x + 1);
-        let middlePart = text.substring(this.state.mouseCoords.x + 1, playerPos);
-        let highlightedPlayer = text.substring(playerPos, playerPos + 1);
-        let lastPart = text.substring(playerPos + 1);
+        var firstPart = text.substring(0, this.state.mouseCoords.x);
+        var highlightedPart = text.substring(this.state.mouseCoords.x, this.state.mouseCoords.x + 1);
+        var middlePart = text.substring(this.state.mouseCoords.x + 1, playerPos);
+        var highlightedPlayer = text.substring(playerPos, playerPos + 1);
+        var lastPart = text.substring(playerPos + 1);
 
         return <label>
           {firstPart}
@@ -251,9 +285,9 @@ class Grid extends React.Component {
       }
       
     } else {
-      let firstPart = text.substring(0, this.state.mouseCoords.x);
-      let highlightedPart = text.substring(this.state.mouseCoords.x, this.state.mouseCoords.x + 1);
-      let secondPart = text.substring(this.state.mouseCoords.x + 1);
+      var firstPart = text.substring(0, this.state.mouseCoords.x);
+      var highlightedPart = text.substring(this.state.mouseCoords.x, this.state.mouseCoords.x + 1);
+      var secondPart = text.substring(this.state.mouseCoords.x + 1);
 
       return <label>{firstPart}<span style={Styles.highlighted}>{highlightedPart}</span>{secondPart}</label>;
     }
@@ -273,7 +307,9 @@ class Grid extends React.Component {
     let yOfNewPos = this.state.playerCoords.y + y;
     let currentRow = this.state.worldText[yOfNewPos];
 
-    if (!currentRow[xOfNewPos].match(/[.,'`"_\-:;]/g)) {
+    if (xOfNewPos < 0 || xOfNewPos > worldWidth || yOfNewPos < 0 || yOfNewPos > worldWidth) return;
+
+    if (!currentRow[xOfNewPos].match(/[.,'`"_\-:;\u00a0 ]/g)) {
       this.messageToConsole("I don't think I can fit through there!");
       console.log("I don't think I can fit through there!");
     } else {
@@ -318,7 +354,7 @@ class Grid extends React.Component {
         console.log(event.key);
         break;
       default:
-        this.setState({ ...this.state, currentInput: this.state.currentInput + event.key });
+        this.setState({ ...this.state, currentInput: event.key });
         console.log(event.key);
     }
   }

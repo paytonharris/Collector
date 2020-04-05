@@ -18,3 +18,30 @@ var getRandomSym = () => {
 export function replaceRandomCharacter() {
 
 }
+
+var makePathFromXToY = (arrayOfText, startingX, endingX, startingY, endingY) => {
+  for (var y = startingY; y <= endingY; y++) {
+    for (var x = startingX; x <= endingX; x++) {
+      arrayOfText[y] = `${arrayOfText[y].substring(0, x)} ${arrayOfText[y].substring(x + 1)}`;
+    }
+  }
+
+  return arrayOfText
+}
+
+export function makePaths(arrayOfText) {
+  var startingCoords = { x: 15, y: 15 };
+
+  var nextX = startingCoords.x;
+  var nextY = startingCoords.y;
+
+  for (var i = 0; i < 100; i++) {
+    nextX = nextX + 1;
+
+    arrayOfText[nextY] = `${arrayOfText[nextY].substring(0, nextX)} ${arrayOfText[nextY].substring(nextX + 1)}`;
+  }
+
+  makePathFromXToY(arrayOfText, 10, 20, 10, 20);
+
+  return arrayOfText;
+}
