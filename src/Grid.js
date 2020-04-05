@@ -1,5 +1,6 @@
 import React from 'react';
 import GameConsole from './GameConsole';
+import GameInfoPanel from './GameInfoPanel';
 import { makePaths } from './Helpers/helper'
 
 let Styles = {
@@ -68,7 +69,9 @@ class Grid extends React.Component {
       ],
       currentCommand: 0, // 0 is null
       currentInput: '',
-      messages: [""]
+      messages: [""],
+      leftPanelInfo: [{ header: "Controls: ", info: ["1: equip cout", "2: equip DEL", 'WASD: move around'] }, { header: "Click: ", info: ["Executes command"] }]
+      //["Controls: ", "1: equip DEL", "2: equip cout", "click: executes command"]
     }
   }
 
@@ -166,7 +169,7 @@ class Grid extends React.Component {
     var xToDel = this.state.mouseCoords.x + this.state.playerCoords.x - 14;
     var yToDel = this.state.mouseCoords.y + this.state.playerCoords.y - 14;
 
-    if (xToDel >= 0 && yToDel >= 0 && xToDel <= 144 && yToDel <= 144) { //within bounds of area
+    if (xToDel >= 0 && yToDel >= 0 && xToDel <= 144 && yToDel <= 144 && this.state.currentInput.length > 0) { //within bounds of area
       let currentRow = this.state.worldText[yToDel];
 
       let newRow = `${currentRow.substring(0, xToDel)}${this.state.currentInput}${currentRow.substring(xToDel + 1)}`;
@@ -349,7 +352,7 @@ class Grid extends React.Component {
         break;
       case '1': case'2': case'3': case'4': case'5': case'6': case'7': case'8': case'9': case'0':
         if (this.state.playerCommands.length > parseInt(event.key)) {
-          this.setState({ ...this.state, currentCommand: parseInt(event.key) });
+          //this.setState({ ...this.state, currentCommand: parseInt(event.key) });
         }
         console.log(event.key);
         break;
@@ -376,19 +379,20 @@ class Grid extends React.Component {
 
     return outText;
   }
+  //<div style={Styles.consoleSpacing}/>
 
   render() {
     return (
       <div style={Styles.container}>
-        <div style={Styles.consoleSpacing}/>
+        <GameInfoPanel info={this.state.leftPanelInfo} />
         <div id='GameBounds' onClick={this.handleClick} onMouseMove={this.trackMouseCoords} style={Styles.divStyle}>
           {this.createLines()}
-          <input 
-            id='GameInput' 
-            style={Styles.inputStyle} 
+          <input
+            id='GameInput'
+            style={Styles.inputStyle}
             onKeyPress={this.handleKey}
-            readOnly 
-            autoFocus 
+            readOnly
+            autoFocus
             value={this.getCommandText()}
           />
         </div>
