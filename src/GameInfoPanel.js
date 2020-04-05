@@ -7,7 +7,7 @@ let Styles = {
     fontSize: '25px',
   },
   subHeaderLabelStyle: {
-    color: '#ddc035',//183310
+    color: '#7799cc',//183310
     borderRadius: '5px',
     fontSize: '20px',
     paddingLeft: '30px'

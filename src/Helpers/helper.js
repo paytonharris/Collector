@@ -30,7 +30,7 @@ var makePathFromXToY = (arrayOfText, startingX, endingX, startingY, endingY) => 
 }
 
 export function makePaths(arrayOfText) {
-  var startingCoords = { x: 15, y: 15 };
+  var startingCoords = { x: 30, y: 30 };
 
   var nextX = startingCoords.x;
   var nextY = startingCoords.y;
@@ -41,7 +41,7 @@ export function makePaths(arrayOfText) {
     arrayOfText[nextY] = `${arrayOfText[nextY].substring(0, nextX)} ${arrayOfText[nextY].substring(nextX + 1)}`;
   }
 
-  makePathFromXToY(arrayOfText, 10, 20, 10, 20);
+  makePathFromXToY(arrayOfText, 20, 40, 20, 40);
 
   return arrayOfText;
 }

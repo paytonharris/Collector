@@ -57,10 +57,10 @@ class Grid extends React.Component {
     super(props);
 
     this.state = {
-      worldText: makePaths(this.convertWorldTextToArrays(props.worldText)),
+      worldText: localStorage.getItem('collectorSavedWorldText') ? JSON.parse(localStorage.getItem('collectorSavedWorldText')) : makePaths(this.convertWorldTextToArrays(props.worldText)),
       divXY: {x: 100, y: 100, height: 100, width: 100},
       mouseCoords: {x: 0, y: 0},
-      playerCoords: {x: 10, y: 10},
+      playerCoords: JSON.parse(localStorage.getItem('collectorSavedPlayerCoordinates')) || {x: 30, y: 30},
       playerCommands: [
         {name: '', func: () => {}},
         {name: "cout <<", func: this.cout},
@@ -81,6 +81,11 @@ class Grid extends React.Component {
     this.startConsoleMessages();
 
     document.getElementById("GameInput").focus();
+  }
+
+  componentWillUnmount() {
+    localStorage.setItem('collectorSavedWorldText', JSON.stringify(this.state.worldText));
+    localStorage.setItem('collectorSavedPlayerCoordinates', JSON.stringify(this.state.playerCoords));
   }
 
   startConsoleMessages = () => {
@@ -255,14 +260,25 @@ class Grid extends React.Component {
 
   createInnerContents = (text, i) => {
     let playerPos = (totalRowsToDisplay - 1) / 2;
+    let playerHighlightStart = playerPos;
+
+    if (text.substring(0, playerPos).match(/DEL$/)) {
+      playerHighlightStart -= 3;
+    }
 
     if (i === playerPos && playerPos !== this.state.mouseCoords.x) { // the player and mouse highlight are on the same row
-      if (this.state.mouseCoords.x > playerPos) {
-        var firstPart = text.substring(0, playerPos);
-        var highlightedPlayer = text.substring(playerPos, playerPos + 1);
+      if (this.state.mouseCoords.x > playerPos) { // mouse on right of player
+        var firstPart = text.substring(0, playerHighlightStart);
+        var highlightedPlayer = text.substring(playerHighlightStart, playerPos + 1);
         var middlePart = text.substring(playerPos + 1, this.state.mouseCoords.x);
         var highlightedPart = text.substring(this.state.mouseCoords.x, this.state.mouseCoords.x + 1);
         var lastPart = text.substring(this.state.mouseCoords.x + 1);
+
+        console.log("firstPart: " + firstPart);
+        console.log("highlightedPart: " + highlightedPart);
+        console.log("middlePart: " + middlePart);
+        console.log("highlightedPlayer: " + highlightedPlayer);
+        console.log("lastPart: " + lastPart);
 
         return <label>
           {firstPart}
@@ -271,11 +287,12 @@ class Grid extends React.Component {
             <span style={Styles.highlighted}>{highlightedPart}</span>
           {lastPart}
         </label>;
-      } else {
+      } else { // mouse on left of player
+
         var firstPart = text.substring(0, this.state.mouseCoords.x);
         var highlightedPart = text.substring(this.state.mouseCoords.x, this.state.mouseCoords.x + 1);
-        var middlePart = text.substring(this.state.mouseCoords.x + 1, playerPos);
-        var highlightedPlayer = text.substring(playerPos, playerPos + 1);
+        var middlePart = text.substring(this.state.mouseCoords.x + 1, playerHighlightStart < this.state.mouseCoords.x + 1 ? this.state.mouseCoords.x + 1 : playerHighlightStart);
+        var highlightedPlayer = text.substring(playerHighlightStart < this.state.mouseCoords.x + 1 ? this.state.mouseCoords.x + 1 : playerHighlightStart, playerPos + 1);
         var lastPart = text.substring(playerPos + 1);
 
         return <label>
@@ -298,9 +315,14 @@ class Grid extends React.Component {
 
   createInnerContentsForCharacter = (text) => {
     let centerCharSpot = (totalRowsToDisplay - 1) / 2;
+    let playerHighlightStart = centerCharSpot;
 
-    let firstPart = text.substring(0, centerCharSpot);
-    let highlightedPart = text.substring(centerCharSpot, centerCharSpot + 1);
+    if (text.substring(0, centerCharSpot).match(/DEL$/)) {
+      playerHighlightStart -= 3;
+    }
+
+    let firstPart = text.substring(0, playerHighlightStart);
+    let highlightedPart = text.substring(playerHighlightStart, centerCharSpot + 1);
     let secondPart = text.substring(centerCharSpot + 1);
     return <label>{firstPart}<span style={Styles.playerHighlight}>{highlightedPart}</span>{secondPart}</label>;
   };
@@ -313,10 +335,15 @@ class Grid extends React.Component {
     if (xOfNewPos < 0 || xOfNewPos > worldWidth || yOfNewPos < 0 || yOfNewPos > worldWidth) return;
 
     if (!currentRow[xOfNewPos].match(/[.,'`"_\-:;\u00a0 ]/g)) {
-      this.messageToConsole("I don't think I can fit through there!");
-      console.log("I don't think I can fit through there!");
+      //this.messageToConsole("I don't think I can fit through there!");
     } else {
-      this.setState({...this.state, playerCoords: {x: this.state.playerCoords.x + x, y: this.state.playerCoords.y + y}})
+
+      if (currentRow.substring(0,xOfNewPos).match(/DEL$/)) {
+        this.setState({...this.state, playerCoords: {x: this.state.playerCoords.x + x, y: this.state.playerCoords.y + y}, currentCommand: 2 });
+        console.log("match del");
+      } else {
+        this.setState({...this.state, playerCoords: {x: this.state.playerCoords.x + x, y: this.state.playerCoords.y + y}, currentCommand: 0 });
+      }
     }
   }
 
@@ -365,7 +392,7 @@ class Grid extends React.Component {
   getCommandText = () => {
     var outText = '';
 
-    if (this.state.currentCommand === 0) return; 
+    if (this.state.currentCommand === 0) return outText; 
 
     if (this.state.playerCommands[this.state.currentCommand]) {
       outText = this.state.playerCommands[this.state.currentCommand].name;

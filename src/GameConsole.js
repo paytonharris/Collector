@@ -5,13 +5,14 @@ let Styles = {
     color: '#ffe0b5',//183310
     backgroundColor: '#111',
     borderRadius: '5px',
-    fontSize: '18px'
+    fontSize: '18px',
+    paddingLeft: '5px'
   },
   divStyle: {
     display: 'flex',
     flexDirection: 'column',
     paddingTop: '5px',
-    backgroundColor: '#2e294e',//D3EAD5
+    backgroundColor: '#7799cc',//D3EAD5 2e294e
     width: '400px',
     height: '400px',
     overflow: 'hidden',
