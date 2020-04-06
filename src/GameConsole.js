@@ -16,15 +16,21 @@ let Styles = {
     width: '400px',
     height: '400px',
     overflow: 'hidden',
-    marginLeft: '50px'
+    marginLeft: '50px',
+    borderRadius: '25px',
+    marginTop: '50px'
   },
   innerDivStyle: {
     display: 'flex',
     overflow: 'auto',
-    height: '99%',
-    paddingRight: '15px',
+    height: '97.5%',
+    paddingLeft: '5px',
+    paddingTop: '5px',
     backgroundColor: '#111',
     flexDirection: 'column',
+    marginRight: '5px',
+    marginLeft: '5px',
+    borderRadius: '20px'
   }
 }
 

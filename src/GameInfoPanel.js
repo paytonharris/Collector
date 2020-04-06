@@ -19,7 +19,8 @@ let Styles = {
     width: '400px',
     height: '400px',
     overflow: 'hidden',
-    marginRight: '50px'
+    marginRight: '50px',
+    marginTop: '50px'
   },
   innerDivStyle: {
     display: 'flex',
@@ -28,6 +29,11 @@ let Styles = {
     paddingRight: '15px',
     flexDirection: 'column',
     alignItems: 'flex-end'
+  },
+  centerVertically: {
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center'
   }
 }
 

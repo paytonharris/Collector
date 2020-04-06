@@ -1,7 +1,7 @@
 import React from 'react';
 import GameConsole from './GameConsole';
 import GameInfoPanel from './GameInfoPanel';
-import { makePaths } from './Helpers/helper'
+import { makePaths, writeWordAtXY } from './Helpers/helper'
 
 let Styles = {
   labelStyle: {
@@ -51,27 +51,29 @@ let Styles = {
 
 let totalRowsToDisplay = 29;
 let worldWidth = 145;
+let moveThroughableChars = /[\u00a0 ]/g; ///[.,'`"_\-:;\u00a0 ]/g;
 
 class Grid extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      worldText: localStorage.getItem('collectorSavedWorldText') ? JSON.parse(localStorage.getItem('collectorSavedWorldText')) : makePaths(this.convertWorldTextToArrays(props.worldText)),
+      worldText: makePaths(this.convertWorldTextToArrays(props.worldText)),
+      //worldText: localStorage.getItem('collectorSavedWorldText') ? JSON.parse(localStorage.getItem('collectorSavedWorldText')) : makePaths(this.convertWorldTextToArrays(props.worldText)),
       divXY: {x: 100, y: 100, height: 100, width: 100},
       mouseCoords: {x: 0, y: 0},
-      playerCoords: JSON.parse(localStorage.getItem('collectorSavedPlayerCoordinates')) || {x: 30, y: 30},
+      playerCoords: {x: 21, y: 69}, //JSON.parse(localStorage.getItem('collectorSavedPlayerCoordinates')) || {x: 30, y: 30},
       playerCommands: [
         {name: '', func: () => {}},
         {name: "cout <<", func: this.cout},
-        {name: "DEL", func: () => this.deleteChar()},
-        {name: "replace([A-Za-z]), ' ');", func: () => this.replaceCharWithDot()}
+        {name: "del", func: () => this.deleteChar()},
+        {name: "replace([A-Za-z]), ' ');", func: () => this.replaceCharWithDot()},
+        {name: "cin >>", func: () => this.cin()}
       ],
       currentCommand: 0, // 0 is null
       currentInput: '',
-      messages: [""],
-      leftPanelInfo: [{ header: "Controls: ", info: ["1: equip cout", "2: equip DEL", 'WASD: move around'] }, { header: "Click: ", info: ["Executes command"] }]
-      //["Controls: ", "1: equip DEL", "2: equip cout", "click: executes command"]
+      messages: [''],
+      leftPanelInfo: [{ header: 'Controls: ', info: ['WASD: move around', 'Click: execute command'] }, { header: 'Tip:', info: ['Find a command', 'and stand to the right', 'then click a char'] }]
     }
   }
 
@@ -84,8 +86,8 @@ class Grid extends React.Component {
   }
 
   componentWillUnmount() {
-    localStorage.setItem('collectorSavedWorldText', JSON.stringify(this.state.worldText));
-    localStorage.setItem('collectorSavedPlayerCoordinates', JSON.stringify(this.state.playerCoords));
+    //localStorage.setItem('collectorSavedWorldText', JSON.stringify(this.state.worldText));
+    //localStorage.setItem('collectorSavedPlayerCoordinates', JSON.stringify(this.state.playerCoords));
   }
 
   startConsoleMessages = () => {
@@ -94,24 +96,28 @@ class Grid extends React.Component {
     }, 1000);
     
     setTimeout(() => {
-      this.messageToConsole("I'm an abandoned garbage collector process.");
+      this.messageToConsole("I'm a garbage collector process.");
     }, 3000);
     
     setTimeout(() => {
-      this.messageToConsole("But that's ok!");
+      this.messageToConsole("I think I've been abandoned, or leaked.");
     }, 6000);
 
     setTimeout(() => {
-      this.messageToConsole("Hint: Press 1 and 2 to change commands");
+      this.messageToConsole("But that's ok!");
     }, 9000);
 
     setTimeout(() => {
-      this.messageToConsole("Click on a character to execute the command!");
+      this.messageToConsole("I have the important job of deleting all this garbage and leftover code.");
     }, 12000);
+
+    setTimeout(() => {
+      this.messageToConsole("But I don't think anyone would mind if I used it myself. Hmmm...");
+    }, 15000);
   };
 
   messageToConsole = (message) => {
-    this.setState({...this.state, messages: [message, ...this.state.messages]});
+    this.setState({...this.state, messages: [...this.state.messages, message]});
   };
 
   convertWorldTextToArrays = (worldText) => {
@@ -174,6 +180,8 @@ class Grid extends React.Component {
     var xToDel = this.state.mouseCoords.x + this.state.playerCoords.x - 14;
     var yToDel = this.state.mouseCoords.y + this.state.playerCoords.y - 14;
 
+    if (this.state.currentInput.match(/[\u00a0 ]/g)) return;
+
     if (xToDel >= 0 && yToDel >= 0 && xToDel <= 144 && yToDel <= 144 && this.state.currentInput.length > 0) { //within bounds of area
       let currentRow = this.state.worldText[yToDel];
 
@@ -184,6 +192,30 @@ class Grid extends React.Component {
       oldWorldText[yToDel] = newRow;
 
       this.setState({ ...this.state, worldText: oldWorldText });
+    }
+  }
+
+  cin = () => {
+    //this.messageToConsole(this.state.currentInput);
+
+    var xToDel = this.state.mouseCoords.x + this.state.playerCoords.x - 14;
+    var yToDel = this.state.mouseCoords.y + this.state.playerCoords.y - 14;
+
+    console.log('inside cin: x: ' + xToDel + ' y:' + yToDel)
+
+    if (xToDel >= 0 && yToDel >= 0 && xToDel <= 144 && yToDel <= 144) { //within bounds of area
+      let currentRow = this.state.worldText[yToDel];
+
+      let input = currentRow.substring(xToDel, xToDel + 1);
+
+      this.setState({ ...this.state, currentInput: input });
+    } else {
+      
+      let currentRow = this.state.worldText[yToDel];
+
+      let input = currentRow.substring(xToDel, xToDel + 1);
+
+      this.setState({ ...this.state, currentInput: input });
     }
   }
 
@@ -262,23 +294,27 @@ class Grid extends React.Component {
     let playerPos = (totalRowsToDisplay - 1) / 2;
     let playerHighlightStart = playerPos;
 
-    if (text.substring(0, playerPos).match(/DEL$/)) {
+    if (text.substring(0, playerPos).match(/del$/i)) {
       playerHighlightStart -= 3;
+    } else if (text.substring(0, playerPos).match(/cout\u00a0<<$/)) {
+      playerHighlightStart -= 7;
+    } else if (text.substring(0, playerPos).match(/cin\u00a0>>$/)) {
+      playerHighlightStart -= 6; 
     }
 
     if (i === playerPos && playerPos !== this.state.mouseCoords.x) { // the player and mouse highlight are on the same row
       if (this.state.mouseCoords.x > playerPos) { // mouse on right of player
         var firstPart = text.substring(0, playerHighlightStart);
-        var highlightedPlayer = text.substring(playerHighlightStart, playerPos + 1);
+        var highlightedPlayer = text.substring(playerHighlightStart, playerPos) + (this.state.currentInput || '\u00a0');
         var middlePart = text.substring(playerPos + 1, this.state.mouseCoords.x);
         var highlightedPart = text.substring(this.state.mouseCoords.x, this.state.mouseCoords.x + 1);
         var lastPart = text.substring(this.state.mouseCoords.x + 1);
 
-        console.log("firstPart: " + firstPart);
-        console.log("highlightedPart: " + highlightedPart);
-        console.log("middlePart: " + middlePart);
-        console.log("highlightedPlayer: " + highlightedPlayer);
-        console.log("lastPart: " + lastPart);
+        // console.log("firstPart: " + firstPart);
+        // console.log("highlightedPart: " + highlightedPart);
+        // console.log("middlePart: " + middlePart);
+        // console.log("highlightedPlayer: " + highlightedPlayer);
+        // console.log("lastPart: " + lastPart);
 
         return <label>
           {firstPart}
@@ -292,7 +328,7 @@ class Grid extends React.Component {
         var firstPart = text.substring(0, this.state.mouseCoords.x);
         var highlightedPart = text.substring(this.state.mouseCoords.x, this.state.mouseCoords.x + 1);
         var middlePart = text.substring(this.state.mouseCoords.x + 1, playerHighlightStart < this.state.mouseCoords.x + 1 ? this.state.mouseCoords.x + 1 : playerHighlightStart);
-        var highlightedPlayer = text.substring(playerHighlightStart < this.state.mouseCoords.x + 1 ? this.state.mouseCoords.x + 1 : playerHighlightStart, playerPos + 1);
+        var highlightedPlayer = text.substring(playerHighlightStart < this.state.mouseCoords.x + 1 ? this.state.mouseCoords.x + 1 : playerHighlightStart, playerPos) + (this.state.currentInput || '\u00a0');
         var lastPart = text.substring(playerPos + 1);
 
         return <label>
@@ -317,12 +353,16 @@ class Grid extends React.Component {
     let centerCharSpot = (totalRowsToDisplay - 1) / 2;
     let playerHighlightStart = centerCharSpot;
 
-    if (text.substring(0, centerCharSpot).match(/DEL$/)) {
+    if (text.substring(0, centerCharSpot).match(/del$/i)) {
       playerHighlightStart -= 3;
+    } else if (text.substring(0, centerCharSpot).match(/cout\u00a0<<$/)) {
+      playerHighlightStart -= 7;
+    } else if (text.substring(0, centerCharSpot).match(/cin\u00a0>>$/)) {
+      playerHighlightStart -= 6; 
     }
 
     let firstPart = text.substring(0, playerHighlightStart);
-    let highlightedPart = text.substring(playerHighlightStart, centerCharSpot + 1);
+    let highlightedPart = text.substring(playerHighlightStart, centerCharSpot) + (this.state.currentInput || '\u00a0');
     let secondPart = text.substring(centerCharSpot + 1);
     return <label>{firstPart}<span style={Styles.playerHighlight}>{highlightedPart}</span>{secondPart}</label>;
   };
@@ -334,13 +374,31 @@ class Grid extends React.Component {
 
     if (xOfNewPos < 0 || xOfNewPos > worldWidth || yOfNewPos < 0 || yOfNewPos > worldWidth) return;
 
-    if (!currentRow[xOfNewPos].match(/[.,'`"_\-:;\u00a0 ]/g)) {
+    if (!currentRow[xOfNewPos].match(moveThroughableChars)) {
       //this.messageToConsole("I don't think I can fit through there!");
     } else {
-
-      if (currentRow.substring(0,xOfNewPos).match(/DEL$/)) {
+      if (currentRow.substring(0, xOfNewPos).match(/del$/i)) {
         this.setState({...this.state, playerCoords: {x: this.state.playerCoords.x + x, y: this.state.playerCoords.y + y}, currentCommand: 2 });
         console.log("match del");
+      } else if (currentRow.substring(0, xOfNewPos).match(/cout <<$/)) {
+        this.setState({...this.state, playerCoords: {x: this.state.playerCoords.x + x, y: this.state.playerCoords.y + y}, currentCommand: 1 });
+        console.log("match cout");
+      } else if (currentRow.substring(0, xOfNewPos).match(/cin >>$/)) {
+        this.setState({...this.state, playerCoords: {x: this.state.playerCoords.x + x, y: this.state.playerCoords.y + y}, currentCommand: 4 });
+        console.log("match cin");
+      } else if (xOfNewPos === 75 && yOfNewPos === 40 && this.state.currentInput === '*') {
+        console.log("YOU DID IT");
+        this.messageToConsole("YOU DID IT!");
+
+        var updateWorldText = this.state.worldText;
+        writeWordAtXY('  ', updateWorldText, 87, 43);
+        writeWordAtXY('  ', updateWorldText, 87, 44); 
+
+        this.setState({...this.state, 
+          playerCoords: {x: this.state.playerCoords.x + x, y: this.state.playerCoords.y + y}, 
+          currentCommand: 0,
+          worldText: updateWorldText
+        });
       } else {
         this.setState({...this.state, playerCoords: {x: this.state.playerCoords.x + x, y: this.state.playerCoords.y + y}, currentCommand: 0 });
       }
@@ -348,7 +406,7 @@ class Grid extends React.Component {
   }
 
   handleClick = (event) => {
-    console.log("clicked: " + this.state.mouseCoords.x + ' ' + this.state.mouseCoords.y);
+    console.log(`clicked: ${this.state.mouseCoords.x + this.state.playerCoords.x - 14},${this.state.mouseCoords.y + this.state.playerCoords.y - 14}`);
 
     if (this.state.playerCommands[this.state.currentCommand]) {
       this.state.playerCommands[this.state.currentCommand].func()
@@ -362,19 +420,15 @@ class Grid extends React.Component {
   handleKey = (event) => {
     switch (event.key) {
       case 'w':
-        console.log('w');
         this.handleMovement(0, -1);
         break;
       case 'a':
-        console.log('a');
         this.handleMovement(-1, 0);
         break;
       case 's':
-        console.log('s');
         this.handleMovement(0, 1);
         break;
       case 'd':
-        console.log('d');
         this.handleMovement(1, 0);
         break;
       case '1': case'2': case'3': case'4': case'5': case'6': case'7': case'8': case'9': case'0':
@@ -384,7 +438,7 @@ class Grid extends React.Component {
         console.log(event.key);
         break;
       default:
-        this.setState({ ...this.state, currentInput: event.key });
+        //this.setState({ ...this.state, currentInput: event.key });
         console.log(event.key);
     }
   }
@@ -406,7 +460,6 @@ class Grid extends React.Component {
 
     return outText;
   }
-  //<div style={Styles.consoleSpacing}/>
 
   render() {
     return (
