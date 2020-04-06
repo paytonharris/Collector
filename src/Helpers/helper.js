@@ -56,7 +56,7 @@ export function makePaths(arrayOfText) {
   
   makePathFromXToY(arrayOfText, 79, 80, 24, 37);
   makePathFromXToY(arrayOfText, 70, 85, 38, 49);
-  makePathFromXToY(arrayOfText, 90, 144, 38, 49);
+  makePathFromXToY(arrayOfText, 90, 142, 38, 49);
 
   writeWordAtXY('DEL', arrayOfText, 38, 37);
   writeWordAtXY('DEL', arrayOfText, 27, 53);
