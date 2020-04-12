@@ -1,4 +1,5 @@
 import React from 'react';
+import DangerButton from './DangerButton';
 
 let Styles = {
   labelStyle: {
@@ -17,7 +18,7 @@ let Styles = {
     flexDirection: 'column',
     paddingTop: '5px',
     width: '400px',
-    height: '400px',
+    height: '700px',
     overflow: 'hidden',
     marginRight: '50px',
     marginTop: '50px'
@@ -37,7 +38,7 @@ let Styles = {
   }
 }
 
-export default function GameConsole(props) {
+export default function GameInfoPanel(props) {
   return (
     <div style={Styles.divStyle}>
       <div style={Styles.innerDivStyle}>
@@ -47,10 +48,14 @@ export default function GameConsole(props) {
               {obj.header}
             </label>
             <div>
-            {obj.info.map(info => <div style={Styles.subHeaderLabelStyle}>{info}</div>)}
+              {obj.info.map(info => <div style={Styles.subHeaderLabelStyle}>{info}</div>)}
             </div>
           </div>)}
       </div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{flex: 1}}></div>
+          <DangerButton handleClick={props.resetGame}>Reset Game</DangerButton>
+        </div>
     </div>
   );
 }

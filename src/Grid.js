@@ -52,17 +52,19 @@ let Styles = {
 let totalRowsToDisplay = 29;
 let worldWidth = 145;
 let moveThroughableChars = /[\u00a0 ]/g; ///[.,'`"_\-:;\u00a0 ]/g;
+let startingPlayerCoords = {x: 21, y: 69};
 
 class Grid extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      worldText: makePaths(this.convertWorldTextToArrays(props.worldText)),
-      //worldText: localStorage.getItem('collectorSavedWorldText') ? JSON.parse(localStorage.getItem('collectorSavedWorldText')) : makePaths(this.convertWorldTextToArrays(props.worldText)),
+      //worldText: makePaths(this.convertWorldTextToArrays(props.worldText)),
+      worldText: localStorage.getItem('collectorSavedWorldText') ? JSON.parse(localStorage.getItem('collectorSavedWorldText')) : makePaths(this.convertWorldTextToArrays(props.worldText)),
       divXY: {x: 100, y: 100, height: 100, width: 100},
       mouseCoords: {x: 0, y: 0},
-      playerCoords: {x: 21, y: 69}, //JSON.parse(localStorage.getItem('collectorSavedPlayerCoordinates')) || {x: 30, y: 30},
+      //playerCoords: startingPlayerCoords, 
+      playerCoords: JSON.parse(localStorage.getItem('collectorSavedPlayerCoordinates')) || startingPlayerCoords,
       playerCommands: [
         {name: '', func: () => {}},
         {name: "cout <<", func: this.cout},
@@ -70,7 +72,7 @@ class Grid extends React.Component {
         {name: "replace([A-Za-z]), ' ');", func: () => this.replaceCharWithDot()},
         {name: "cin >>", func: () => this.cin()}
       ],
-      currentCommand: 0, // 0 is null
+      currentCommand: 0, // 0 means no command
       currentInput: '',
       messages: [''],
       leftPanelInfo: [{ header: 'Controls: ', info: ['WASD: move around', 'Click: execute command'] }, { header: 'Tip:', info: ['Find a command', 'and stand to the right', 'then click a char'] }]
@@ -82,12 +84,35 @@ class Grid extends React.Component {
 
     this.startConsoleMessages();
 
+    this.autoSaveLoop();
+
     document.getElementById("GameInput").focus();
   }
 
   componentWillUnmount() {
-    //localStorage.setItem('collectorSavedWorldText', JSON.stringify(this.state.worldText));
-    //localStorage.setItem('collectorSavedPlayerCoordinates', JSON.stringify(this.state.playerCoords));
+    this.saveGame();
+  }
+
+  autoSaveLoop = () => {
+    setTimeout(() => {
+      this.saveGame();
+      this.autoSaveLoop();
+    }, 10000);
+  };
+
+  saveGame = () => {
+    console.log("Saving game...");
+
+    localStorage.setItem('collectorSavedWorldText', JSON.stringify(this.state.worldText));
+    localStorage.setItem('collectorSavedPlayerCoordinates', JSON.stringify(this.state.playerCoords));
+
+    console.log("Game saved!");
+  };
+
+  resetGame = () => {
+    console.log("Resetting game...");
+
+    this.setState({ ...this.state, worldText: makePaths(this.convertWorldTextToArrays(this.props.worldText)), playerCoords: startingPlayerCoords});
   }
 
   startConsoleMessages = () => {
@@ -464,7 +489,7 @@ class Grid extends React.Component {
   render() {
     return (
       <div style={Styles.container}>
-        <GameInfoPanel info={this.state.leftPanelInfo} />
+        <GameInfoPanel resetGame={this.resetGame} info={this.state.leftPanelInfo} />
         <div id='GameBounds' onClick={this.handleClick} onMouseMove={this.trackMouseCoords} style={Styles.divStyle}>
           {this.createLines()}
           <input

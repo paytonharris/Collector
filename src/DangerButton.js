@@ -21,7 +21,6 @@ let Styles = {
     justifyContent: 'stretch',
     textAlign: 'center',
     fontFamily: 'VT323',
-    letterSpacing: '4px',
     fontSize: '32px',
     transition: '1s',
     cursor: 'pointer'
@@ -61,7 +60,7 @@ let Styles = {
   }
 }
 
-class Button extends React.Component {
+class DangerButton extends React.Component {
   state = {
     showBox: false
   };
@@ -75,7 +74,7 @@ class Button extends React.Component {
         onMouseLeave={this.handleBoxToggle}
       >
         <button onClick={this.props.handleClick} style={this.state.showBox ? Styles.divStyle : Styles.divStyleOver}>
-          <label style={this.state.showBox ? {...this.props.style, ...Styles.labelStyleOver} : {...this.props.style, ...Styles.labelStyle}}>
+          <label style={this.state.showBox ? Styles.labelStyleOver : Styles.labelStyle}>
             {this.props.children}
           </label>
         </button>
@@ -84,4 +83,4 @@ class Button extends React.Component {
   }
 }
 
-export default Button;
+export default DangerButton;
