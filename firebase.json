@@ -10,7 +10,15 @@
       "**/node_modules/**"
     ],
     "rewrites": [ {
-      "source": "**",
+      "source": "/Game",
+      "destination": "/index.html"
+    }, 
+    {
+      "source": "/About",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/Home",
       "destination": "/index.html"
     } ]
   }

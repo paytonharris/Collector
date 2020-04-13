@@ -77,4 +77,20 @@ export function makePaths(arrayOfText) {
   writeWordAtXY('CONGRATULATIONS!', arrayOfText, 125, 44);
 
   return arrayOfText;
+};
+
+var getRandomInt = (min, max) => { // min and max are inclusive
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+export var makeRandomCoinPositions = (num) => {
+  var list = [];
+
+  for (var i = 0; i < num; i++) {
+    list.push({ x: getRandomInt(0,144), y: getRandomInt(0,144) });
+  }
+
+  return list;
+};

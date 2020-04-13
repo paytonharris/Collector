@@ -1,7 +1,7 @@
 import React from 'react';
 import GameConsole from './GameConsole';
 import GameInfoPanel from './GameInfoPanel';
-import { makePaths, writeWordAtXY } from './Helpers/helper'
+import { makePaths, writeWordAtXY, makeRandomCoinPositions } from './Helpers/helper'
 
 let Styles = {
   labelStyle: {
@@ -46,6 +46,14 @@ let Styles = {
   },
   consoleSpacing: {
     width: '400px'
+  },
+  coinStyle: {
+    height: '0px',
+    width: '0px',
+    position: 'absolute',
+    borderRadius: '50%',
+    opacity: '70%',
+    boxShadow: '0 0 10px 10px #bbb' //3f9aaa
   }
 };
 
@@ -53,6 +61,8 @@ let totalRowsToDisplay = 29;
 let worldWidth = 145;
 let moveThroughableChars = /[\u00a0 ]/g; ///[.,'`"_\-:;\u00a0 ]/g;
 let startingPlayerCoords = {x: 21, y: 69};
+
+var gameMusic = new Audio('https://firebasestorage.googleapis.com/v0/b/collector-188a6.appspot.com/o/happysong.mp3?alt=media&token=315571db-dbf4-431e-bf2a-f89d00d33524');
 
 class Grid extends React.Component {
   constructor(props) {
@@ -75,16 +85,28 @@ class Grid extends React.Component {
       currentCommand: 0, // 0 means no command
       currentInput: '',
       messages: [''],
+      coins: makeRandomCoinPositions(100), //[{ x: 21, y: 69 }, { x: 22, y: 69 }, { x: 23, y: 69 }, { x: 24, y: 69 }, { x: 10, y: 32 }],
+      coinShine: 70,
+      coinCount: 0,
+      shineIncreasing: true,
       leftPanelInfo: [{ header: 'Controls: ', info: ['WASD: move around', 'Click: execute command'] }, { header: 'Tip:', info: ['Find a command', 'and stand to the right', 'then click a char'] }]
     }
   }
 
   componentDidMount() {
-    this.setState({...this.state, divXY: this.getCurrentDivPosition()});
+    this.syncScreenSize();
 
     this.startConsoleMessages();
 
     this.autoSaveLoop();
+    this.coinGlowAffect();
+
+    gameMusic.play();
+    gameMusic.loop = true;
+    gameMusic.muted = true;
+    gameMusic.volume = 0.0;
+
+    this.fadeInMusic(0.0);
 
     document.getElementById("GameInput").focus();
   }
@@ -95,8 +117,15 @@ class Grid extends React.Component {
 
   autoSaveLoop = () => {
     setTimeout(() => {
-      this.saveGame();
+      try {
+        this.saveGame();
+        this.syncScreenSize();
+      }
+      catch (e) {
+        console.log(e);
+      }
       this.autoSaveLoop();
+
     }, 10000);
   };
 
@@ -114,6 +143,41 @@ class Grid extends React.Component {
 
     this.setState({ ...this.state, worldText: makePaths(this.convertWorldTextToArrays(this.props.worldText)), playerCoords: startingPlayerCoords});
   }
+
+  syncScreenSize = () => {
+    this.setState({...this.state, divXY: this.getCurrentDivPosition()});
+  }
+
+  coinGlowAffect = () => {
+    setTimeout(() => {
+      let nextCoinShine = this.state.coinShine;
+      let nextIncreasing = this.state.shineIncreasing;
+
+      if (this.state.shineIncreasing) { 
+        nextCoinShine = this.state.coinShine + 5;
+        if (nextCoinShine > 100) {
+          nextCoinShine = 100;
+          nextIncreasing = false;
+        }
+      } else {
+        nextCoinShine = this.state.coinShine - 5;
+        if (nextCoinShine < 60) {
+          nextCoinShine = 65;
+          nextIncreasing = true;
+        }
+      }
+
+      this.setState({ ...this.state, coinShine: nextCoinShine, shineIncreasing: nextIncreasing })
+      this.coinGlowAffect();
+    }, 300);
+  };
+
+  collectCoin = (newCoinList) => {
+    var coinAudio = new Audio('https://firebasestorage.googleapis.com/v0/b/collector-188a6.appspot.com/o/coinget.mp3?alt=media&token=d532eab5-516f-45d2-b247-1818b54dc3cf');
+    coinAudio.play();
+    
+    this.setState({ ...this.state, coins: newCoinList, coinCount: this.state.coinCount + 1 });
+  };
 
   startConsoleMessages = () => {
     setTimeout(() => {
@@ -250,7 +314,7 @@ class Grid extends React.Component {
     var currentX = position.left;
     var currentY = position.top;
 
-    console.log(`THE DIV IS x: ${currentX}, y: ${currentY}, height: ${position.height}, width: ${position.width}`);
+    //console.log(`THE DIV IS x: ${currentX}, y: ${currentY}, height: ${position.height}, width: ${position.width}`);
 
     return {x: currentX + 10, y: currentY + 3, height: position.height - 49.4, width: position.width}
   };
@@ -263,6 +327,41 @@ class Grid extends React.Component {
       this.setState({...this.state, mouseCoords: {x: xCoord, y: yCoord}});
       //console.log(`current spot: ${JSON.stringify(this.state.mouseCoords)}`);
     }
+  };
+
+  placeGlowAtCoords = (x, y) => {
+    var newCoins = this.state.coins;
+    newCoins.push({ x: x, y: y });
+
+    this.setState({ ...this.state, newCoins })
+  };
+
+  getCoinPosition = (coin) => {
+    let halfScreenSize = Math.floor(totalRowsToDisplay / 2);
+
+    if (coin.x < this.state.playerCoords.x - halfScreenSize || coin.x > this.state.playerCoords.x + halfScreenSize || 
+      coin.y < this.state.playerCoords.y - halfScreenSize || coin.y > this.state.playerCoords.y + halfScreenSize) {
+        return { opacity: '0%' };
+    }
+
+    let divPos = { x: 0, y: 0, height: 0, width: 0 };
+
+    try { // try, in case the div isn't loaded yet
+      divPos = this.getCurrentDivPosition();
+    } catch (e) {
+      console.log("nothing to display");
+    }
+
+    let charWidth = divPos.width / totalRowsToDisplay;
+    let charHeight = divPos.height / totalRowsToDisplay;
+
+    //var xCoord = Math.round(((divPos.x - this.state.divXY.x) / this.state.divXY.width) * totalRowsToDisplay);
+    //var yCoord = Math.round(((event.clientY - this.state.divXY.y) / this.state.divXY.height) * totalRowsToDisplay);
+
+    var x = ((halfScreenSize + coin.x - this.state.playerCoords.x) * charWidth) + divPos.x;
+    var y = ((halfScreenSize + coin.y - this.state.playerCoords.y) * charHeight) + divPos.y + 4;
+
+    return { top: `${y}px`, left: `${x}px` };
   };
 
   getRowOfWorldText = (num) => {
@@ -402,6 +501,14 @@ class Grid extends React.Component {
     if (!currentRow[xOfNewPos].match(moveThroughableChars)) {
       //this.messageToConsole("I don't think I can fit through there!");
     } else {
+      // let coinToPickUp = this.state.coins.map((coin) => `${coin.x},${coin.y}`).indexOf(`${xOfNewPos},${yOfNewPos}`);
+
+      // if (coinToPickUp !== -1) {
+      //   let newCoinList = this.state.coins;
+      //   newCoinList.splice(coinToPickUp, 1);
+      //   setTimeout(() => this.collectCoin(newCoinList), 0);
+      // }
+
       if (currentRow.substring(0, xOfNewPos).match(/del$/i)) {
         this.setState({...this.state, playerCoords: {x: this.state.playerCoords.x + x, y: this.state.playerCoords.y + y}, currentCommand: 2 });
         console.log("match del");
@@ -413,7 +520,7 @@ class Grid extends React.Component {
         console.log("match cin");
       } else if (xOfNewPos === 75 && yOfNewPos === 40 && this.state.currentInput === '*') {
         console.log("YOU DID IT");
-        this.messageToConsole("YOU DID IT!");
+        setTimeout(() => this.messageToConsole("YOU DID IT!"), 0);
 
         var updateWorldText = this.state.worldText;
         writeWordAtXY('  ', updateWorldText, 87, 43);
@@ -428,10 +535,21 @@ class Grid extends React.Component {
         this.setState({...this.state, playerCoords: {x: this.state.playerCoords.x + x, y: this.state.playerCoords.y + y}, currentCommand: 0 });
       }
     }
-  }
+  };
 
   handleClick = (event) => {
-    console.log(`clicked: ${this.state.mouseCoords.x + this.state.playerCoords.x - 14},${this.state.mouseCoords.y + this.state.playerCoords.y - 14}`);
+    let clickedX = this.state.mouseCoords.x + this.state.playerCoords.x - 14;
+    let clickedY = this.state.mouseCoords.y + this.state.playerCoords.y - 14;
+
+    console.log(`clicked: ${clickedX},${clickedY}`);
+
+    let coinToPickUp = this.state.coins.map((coin) => `${coin.x},${coin.y}`).indexOf(`${clickedX},${clickedY}`);
+
+      if (coinToPickUp !== -1) {
+        let newCoinList = this.state.coins;
+        newCoinList.splice(coinToPickUp, 1);
+        setTimeout(() => this.collectCoin(newCoinList), 0);
+      }
 
     if (this.state.playerCommands[this.state.currentCommand]) {
       this.state.playerCommands[this.state.currentCommand].func()
@@ -440,7 +558,7 @@ class Grid extends React.Component {
     //this.setState({ ...this.state, currentInput: '' })
 
     document.getElementById('GameInput').focus();
-  }
+  };
 
   handleKey = (event) => {
     switch (event.key) {
@@ -466,7 +584,7 @@ class Grid extends React.Component {
         //this.setState({ ...this.state, currentInput: event.key });
         console.log(event.key);
     }
-  }
+  };
 
   getCommandText = () => {
     var outText = '';
@@ -484,12 +602,29 @@ class Grid extends React.Component {
     }
 
     return outText;
+  };
+
+  toggleMusic = () => {
+    if (gameMusic.muted) {
+      gameMusic.muted = false;
+    } else {
+      gameMusic.muted = true;
+    }
+  };
+
+  fadeInMusic = (vol) => {
+    if (vol >= 1.0) vol = 1.0;
+
+    gameMusic.volume = vol;
+    if (!(vol >= 1.0)) {
+      setTimeout(() => this.fadeInMusic(vol + 0.01), 300);
+    }
   }
 
   render() {
     return (
       <div style={Styles.container}>
-        <GameInfoPanel resetGame={this.resetGame} info={this.state.leftPanelInfo} />
+        <GameInfoPanel resetGame={this.resetGame} info={this.state.leftPanelInfo} toggleMusic={this.toggleMusic} coinCount={this.state.coinCount} />
         <div id='GameBounds' onClick={this.handleClick} onMouseMove={this.trackMouseCoords} style={Styles.divStyle}>
           {this.createLines()}
           <input
@@ -502,6 +637,7 @@ class Grid extends React.Component {
           />
         </div>
         <GameConsole messages={this.state.messages}/>
+        {this.state.coins.map((coin) => <div style={{ ...Styles.coinStyle, opacity: `${this.state.coinShine}%`, ...this.getCoinPosition(coin) }}></div>)}
       </div>
     );
   }

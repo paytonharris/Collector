@@ -54,7 +54,12 @@ export default function GameInfoPanel(props) {
       </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{flex: 1}}></div>
+          <div>
+            <label style={Styles.labelStyle}>Volatile Bits:</label>
+            <label style={{ ...Styles.subHeaderLabelStyle, fontSize: 42, paddingLeft: "20px"}}>{props.coinCount}</label>
+          </div>
           <DangerButton handleClick={props.resetGame}>Reset Game</DangerButton>
+          <DangerButton handleClick={props.toggleMusic}>Toggle Music</DangerButton>
         </div>
     </div>
   );
