@@ -1,5 +1,5 @@
 # Collector
 
-## A website to test various ideas
+## A game where you play as a garbage collector process.
 
-More info coming soon!
+As you clean up unused code, you discover you can use the leftover code to your advantage.
